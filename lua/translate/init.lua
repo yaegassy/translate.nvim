@@ -100,14 +100,20 @@ function M._translate(pos, cmd_args)
     return
   end
 
+  local chunks = {}
   luv.read_start(
     stdio[2],
-    vim.schedule_wrap(function(err, result)
+    vim.schedule_wrap(function(err, data)
       assert(not err, err)
 
-      if result then
-        result = M._run(parse_after, result, pos)
-        output(result, pos)
+      if data then
+        table.insert(chunks, data)
+      else
+        local result = table.concat(chunks)
+        if result ~= "" then
+          result = M._run(parse_after, result, pos)
+          output(result, pos)
+        end
       end
     end)
   )
